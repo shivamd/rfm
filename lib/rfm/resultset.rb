@@ -72,7 +72,12 @@ module Rfm
       @portal_meta    ||= Rfm::CaseInsensitiveHash.new
       @include_portals  = portals 
       
-      doc = Nokogiri.XML(remove_namespace(xml_response))
+      if xml_response.encoding.to_s == "ASCII-8BIT"
+        data = remove_namespace(xml_response)
+        doc = Nokogiri.XML(data.force_encoding('utf-8'))
+      else
+        doc = Nokogiri.XML(remove_namespace(xml_response))
+      end
       
       error = doc.xpath('/fmresultset/error').attribute('code').value.to_i
       check_for_errors(error, server.state[:raise_on_401])
